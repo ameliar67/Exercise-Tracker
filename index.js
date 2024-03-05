@@ -2,7 +2,7 @@ const express = require("express");
 const cors = require("cors");
 const mongoose = require("mongoose");
 require("dotenv").config();
-var bodyParser = require("body-parser");
+const bodyParser = require("body-parser");
 
 const app = express();
 
@@ -53,9 +53,9 @@ app.get("/api/users", (req, res) => {
 
 //post new user
 app.post("/api/users", (req, res) => {
-  var user = req.body.username;
+  const user = req.body.username;
 
-  var new_user = new User({
+  const new_user = new User({
     username: user,
   });
 
@@ -73,7 +73,7 @@ app.post("/api/users", (req, res) => {
 
 //post new exercise
 app.post("/api/users/:_id/exercises", (req, res) => {
-  var result_id = req.params["_id"];
+  const result_id = req.params["_id"];
 
   if (!req.body.date) {
     req.body.date = new Date();
@@ -81,7 +81,7 @@ app.post("/api/users/:_id/exercises", (req, res) => {
 
   User.findByIdAndUpdate(result_id, { $push: { log: req.body } })
     .then(function (models) {
-      var date = new Date(req.body.date);
+      const date = new Date(req.body.date);
       const newDate = date.toDateString();
 
       const expected = {
@@ -102,21 +102,10 @@ app.post("/api/users/:_id/exercises", (req, res) => {
 
 //get logs
 app.get("/api/users/:_id/logs", (req, res) => {
-  var id = req.params["_id"];
-  var from = new Date(1990, 01, 01);
-  var to = new Date();
-  var limit = 500;
-  var values = [];
+  const id = req.params["_id"];
+  let limit = 500;
+  const values = [];
   values.push(req.query);
-
-  if (req.query.from) {
-    from = new Date(values[0].from);
-    from = from.toISOString();
-  }
-
-  if (req.query.to) {
-    to = values[0].to;
-  }
 
   if (req.query.limit) {
     limit = Number(values[0].limit);
@@ -125,23 +114,23 @@ app.get("/api/users/:_id/logs", (req, res) => {
   User.find({ _id: id }, { log: { $slice: limit } })
 
     .then(function (models) {
-      var arr = models[0].log;
-      var count = arr.length;
-      var hello = [];
+      const arr = models[0].log;
+      const count = arr.length;
+      const logEntries = [];
 
-      for (i = 0; i < count; i++) {
+      for (let i = 0; i < count; i++) {
         if (arr[i].date) {
-          var new_date = arr[i].date.toDateString();
-          var object = {
+          const new_date = arr[i].date.toDateString();
+          const object = {
             description: arr[i].description,
             duration: arr[i].duration,
             date: new_date,
           };
-          hello.push(object);
+          logEntries.push(object);
         }
       }
 
-      const newObject = { count: count, ...models[0].toObject(), log: hello };
+      const newObject = { count: count, ...models[0].toObject(), log: logEntries };
 
       res.json(newObject);
     })
